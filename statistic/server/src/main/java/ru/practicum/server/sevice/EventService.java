@@ -26,8 +26,4 @@ public class EventService {
         }
     }
 
-    public List<Event> findAll() {
-        return repository.findAll();
-    }
-
 }
