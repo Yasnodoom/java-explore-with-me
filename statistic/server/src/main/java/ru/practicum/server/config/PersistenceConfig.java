@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @EnableJpaRepositories(basePackages = "ru.practicum.*")
-@EntityScan("ru.practicum.dto.event")
+@EntityScan("ru.practicum.dto")
 public class PersistenceConfig {
 }

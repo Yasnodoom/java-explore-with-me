@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.client.BaseClient;
-import ru.practicum.dto.event.Event;
+import ru.practicum.dto.logevent.LogEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class ClientController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> hit(@RequestBody final Event event) {
+    public ResponseEntity<Object> hit(@RequestBody final LogEvent event) {
         return client.hit(event);
     }
 
