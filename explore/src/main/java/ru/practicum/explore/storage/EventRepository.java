@@ -43,7 +43,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             and e.state like 'PUBLISHED'
             and :categories is null or e.category_id in :categories
             and :paid is null or e.paid = :paid
-            and e.event_date between (:rangeStart is null or :rangeStart) and (:rangeEnd is null or :rangeEnd)
+            and coalesce(:rangeStart, null) is null or (e.event_date between :rangeStart and :rangeEnd)
             """, nativeQuery = true)
     List<Event> findByParams(@Param("annotation") String annotation,
                              @Param("categories") List<Long> categories,
