@@ -25,9 +25,9 @@ public class StatisticServerController {
 
     @SneakyThrows
     @GetMapping("/stats")
-    public List<ViewStats> stats(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public List<ViewStats> stats(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                  LocalDateTime start,
-                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                  LocalDateTime end,
                                  @RequestParam(required = false, defaultValue = "") List<String> uris,
                                  @RequestParam(required = false, defaultValue = "false") boolean unique) {

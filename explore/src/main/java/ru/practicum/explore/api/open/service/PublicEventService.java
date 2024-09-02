@@ -1,7 +1,6 @@
 package ru.practicum.explore.api.open.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -15,6 +14,7 @@ import ru.practicum.dto.statdata.StatData;
 import ru.practicum.explore.api.admin.service.AdminEventService;
 import ru.practicum.explore.api.closed.service.PrivateEventService;
 import ru.practicum.explore.api.closed.service.PrivateRequestService;
+import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.stat.FuckinService;
 import ru.practicum.explore.stat.StatService;
@@ -45,8 +45,15 @@ public class PublicEventService {
     public List<EventShotDto> find(HttpServletRequest request, String text, List<Long> categories, Boolean paid,
                                    LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                    Boolean onlyAvailable, SortType sort, Integer from, Integer size) {
-        List<Event> events;
+
+        if (rangeStart != null && rangeEnd != null) {
+            if (rangeStart.isAfter(rangeEnd)) {
+                throw new ValidationException("end date is after start date");
+            }
+        }
+
         List<EventShotDto> eventShotDtoList;
+        List<Event> events;
 
         if (rangeStart == null || rangeEnd == null) {
             events = eventRepository.findByParamsWithoutTimeRage(text, categories, paid,
@@ -55,8 +62,9 @@ public class PublicEventService {
             events = eventRepository.findByParams(text, categories, paid, rangeStart,
                     rangeEnd, PageRequest.of(from, size, Sort.by(sort.name())));
         }
-        if (onlyAvailable) {
-            events.removeIf(Predicate.not(privateEventService::isParticipantLimitEmpty));
+
+        if (onlyAvailable != null && onlyAvailable) {
+            events.removeIf(Predicate.not(privateEventService::isParticipantLimitIsEmpty));
         }
 
         eventShotDtoList = events
@@ -73,11 +81,13 @@ public class PublicEventService {
         parameters.put("end", rangeEnd);
         parameters.put("unique", false);
         parameters.put("uris", request.getRequestURI());
-//        List<StatData> stat = statService.getStats(parameters);
         List<StatData> stat = fuckinService.getStat(parameters);
 
-        eventShotDtoList.forEach(el -> el.setViews(stat.get(0).getHits()));
-
+        if (stat.isEmpty()) {
+            eventShotDtoList.forEach(el -> el.setViews(0));
+        } else {
+            eventShotDtoList.forEach(el -> el.setViews(stat.get(0).getHits()));
+        }
         statService.logRequest(request);
 
         return eventShotDtoList;
@@ -87,7 +97,7 @@ public class PublicEventService {
         Event event = adminEventService.findEventById(id);
 
         if (!event.getState().equals(PUBLISHED)) {
-            throw new ValidationException("only published");
+            throw new NotFoundException(event.getId());
         }
 
         int confirmRequests = privateRequestService
@@ -99,7 +109,7 @@ public class PublicEventService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("start", LocalDateTime.now().minusMonths(1));
         parameters.put("end", LocalDateTime.now().plusMonths(1));
-        parameters.put("unique", false);
+        parameters.put("unique", true);
         parameters.put("uris", request.getRequestURI());
         List<StatData> stat = fuckinService.getStat(parameters);
 
@@ -108,7 +118,6 @@ public class PublicEventService {
         } else {
             eventFullDto.setViews(stat.get(0).getHits());
         }
-
         statService.logRequest(request);
 
         return eventFullDto;

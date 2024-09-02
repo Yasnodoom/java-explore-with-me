@@ -1,10 +1,11 @@
-DELETE FROM requests;
-DELETE FROM events;
-DELETE FROM users;
-DELETE FROM locations;
-DELETE FROM categories;
-DELETE FROM compilations;
-DELETE FROM events_compilations;
+TRUNCATE requests, events, users, locations, categories, compilations, events_compilations CASCADE;
+--DELETE FROM requests;
+--DELETE FROM events;
+--DELETE FROM users;
+--DELETE FROM locations;
+--DELETE FROM categories;
+--DELETE FROM compilations;
+--DELETE FROM events_compilations;
 
 
 ALTER TABLE users ALTER COLUMN user_id RESTART WITH 1;

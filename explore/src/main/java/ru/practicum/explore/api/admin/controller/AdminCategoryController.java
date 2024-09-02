@@ -1,5 +1,6 @@
 package ru.practicum.explore.api.admin.controller;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ public class AdminCategoryController {
     }
 
     @PatchMapping("/{catId}")
+    @Transactional
     public Category patch(@PathVariable long catId, @Valid @RequestBody final Category data) {
         return service.patch(catId, data);
     }

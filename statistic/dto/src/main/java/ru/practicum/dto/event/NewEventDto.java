@@ -29,14 +29,15 @@ public class NewEventDto {
     private String description;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Future
     private LocalDateTime eventDate;
 
     private Location location;
     private Boolean paid = false;
-    private Integer participantLimit;
 
-    private Boolean requestModeration = false;
+    @Min(value = 0)
+    private Integer participantLimit = 0;
+
+    private Boolean requestModeration = true;
 
     @NotNull
     @NotBlank

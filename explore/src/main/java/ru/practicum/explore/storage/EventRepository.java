@@ -3,6 +3,7 @@ package ru.practicum.explore.storage;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.dto.event.Event;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,20 @@ import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByInitiatorUserId(Long userId, Pageable pageable);
+
+//    @Query(value = """
+//            select * from events e
+//            where :userIds is null or e.initiator_id in (:userIds)
+//            and :states is null or e.state in (:states)
+//            and :categories is null or e.category_id in (:categories)
+//            and  cast(cast(:rangeStart as text) as timestamp) is null or e.event_date between cast(cast(:rangeStart as text) as timestamp) and cast(cast(:rangeEnd as text) as timestamp)
+//            """, nativeQuery = true)
+//    List<Event> finaAllByParams(@Param("userIds") List<Long> usersIds,
+//                                @Param("states") List<String> states,
+//                                @Param("categories") List<Long> categories,
+//                                @Param("rangeStart") LocalDateTime rangeStart,
+//                                @Param("rangeEnd") LocalDateTime rangeEnd,
+//                                Pageable pageable);
 
     List<Event> findAllByInitiatorUserIdInAndStateInAndCategoryIdInAndEventDateBetween(
             List<Long> users,
@@ -24,28 +39,35 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query(value = """
             select * from events e
-            where lower(e.annotation) like lower(?1)
+            where :annotation is null or lower(e.annotation) like lower(:annotation)
             and e.state like 'PUBLISHED'
-            and e.category_id in ?2
-            and e.paid = ?3
-            and e.event_date between ?4 and ?5
+            and :categories is null or e.category_id in :categories
+            and :paid is null or e.paid = :paid
+            and e.event_date between (:rangeStart is null or :rangeStart) and (:rangeEnd is null or :rangeEnd)
             """, nativeQuery = true)
-    List<Event> findByParams(String text,
-                             List<Long> categories,
-                             Boolean paid,
-                             LocalDateTime rangeStart, LocalDateTime rangeEnd,
+    List<Event> findByParams(@Param("annotation") String annotation,
+                             @Param("categories") List<Long> categories,
+                             @Param("paid") Boolean paid,
+                             @Param("rangeStart") LocalDateTime rangeStart,
+                             @Param("rangeEnd") LocalDateTime rangeEnd,
                              Pageable pageable);
 
     @Query(value = """
             select * from events e
-            where lower(e.annotation) like lower(?1)
+            where :annotation is null or lower(e.annotation) like lower(:annotation)
             and e.state like 'PUBLISHED'
-            and e.category_id in ?2
-            and e.paid = ?3
+            and :categories is null or e.category_id in :categories
+            and :paid is null or e.paid = :paid
             and e.event_date > current_timestamp
             """, nativeQuery = true)
-    List<Event> findByParamsWithoutTimeRage(String text, List<Long> categories, Boolean paid,
+    List<Event> findByParamsWithoutTimeRage(@Param("annotation") String annotation,
+                                            @Param("categories") List<Long> categories,
+                                            @Param("paid") Boolean paid,
                                             Pageable pageable);
 
     List<Event> findAllByCompilationsId(long compId);
+
+    // cast
+    @Query(value = "select * from events e", nativeQuery = true)
+    List<Event> findAllEvents(Pageable pageable);
 }

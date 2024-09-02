@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Table(name = "categories")
@@ -23,7 +25,7 @@ public class Category {
 
     @NotNull
     @NotBlank
-    @NotEmpty
+    @Length(max = 50)
     @Column(name = "name", unique = true)
     private String name;
 }

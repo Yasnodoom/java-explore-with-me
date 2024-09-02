@@ -1,7 +1,5 @@
 package ru.practicum.explore.stat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -30,10 +28,14 @@ public class FuckinService {
                 .build();
     }
 
-    public List<StatData> getStat(@Nullable Map<String, Object> parameters) {
+    public List<StatData> getStat(Map<String, Object> parameters) {
+        String path = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
+//        if (parameters.get("start") == null) {
+//            path = "/stats?uris={uris}&unique={unique}";
+//        }
         ResponseEntity<List<StatData>> responseEntity =
                 restTemplate.exchange(
-                        "/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                        path,
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<List<StatData>>() {},

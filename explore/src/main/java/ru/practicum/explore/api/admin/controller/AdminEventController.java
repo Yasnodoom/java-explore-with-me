@@ -1,6 +1,5 @@
 package ru.practicum.explore.api.admin.controller;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +17,12 @@ public class AdminEventController {
     private final AdminEventService service;
 
     @GetMapping
-    public List<EventFullDto> findAll(@RequestParam List<Long> users,
-                                      @RequestParam List<String> states,
-                                      @RequestParam List<Long> categories,
-                                      @RequestParam
-                                      @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public List<EventFullDto> findAll(@RequestParam(required = false) List<Long> users,
+                                      @RequestParam(required = false) List<String> states,
+                                      @RequestParam(required = false) List<Long> categories,
+                                      @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                       LocalDateTime rangeStart,
-                                      @RequestParam
-                                      @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                      @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                       LocalDateTime rangeEnd,
                                       @RequestParam(defaultValue = "0") Integer from,
                                       @RequestParam(defaultValue = "10") Integer size) {
@@ -33,7 +30,6 @@ public class AdminEventController {
     }
 
     @PatchMapping("/{eventId}")
-    @Transactional
     public EventFullDto patch(@PathVariable long eventId,
                               @RequestBody final UpdateEventAdminRequest data) {
         return service.updateEvent(eventId, data);

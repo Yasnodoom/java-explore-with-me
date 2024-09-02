@@ -22,8 +22,8 @@ public class ClientController {
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<Object> stats(@RequestParam String start,
-                                        @RequestParam String end,
+    public ResponseEntity<Object> stats(@RequestParam(required = false) String start,
+                                        @RequestParam(required = false) String end,
                                         @RequestParam(required = false) String uris,
                                         @RequestParam(required = false, defaultValue = "false") boolean unique) {
         Map<String, Object> parameters = new HashMap<>();

@@ -10,12 +10,15 @@ import ru.practicum.dto.event.UpdateEventUserRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.dto.request.Request;
 import ru.practicum.dto.request.mapper.RequestMapper;
 import ru.practicum.explore.api.admin.service.AdminCategoryService;
 import ru.practicum.explore.api.admin.service.AdminUserService;
+import ru.practicum.explore.exception.ConflictException;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.storage.EventRepository;
+import ru.practicum.explore.storage.RequestRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,12 +26,14 @@ import java.util.List;
 import static ru.practicum.dto.enums.RequestStatus.*;
 import static ru.practicum.dto.event.Status.PUBLISHED;
 import static ru.practicum.dto.event.mapper.EventMapper.toEvent;
+import static ru.practicum.dto.request.mapper.RequestMapper.toParticipationRequestDto;
 import static ru.practicum.explore.utils.EventUtils.updateStatusByUser;
 
 @Service
 @RequiredArgsConstructor
 public class PrivateEventService {
     private final EventRepository eventRepository;
+    private final RequestRepository requestRepository;
     private final AdminUserService adminUserService;
     private final AdminCategoryService adminCategoryService;
     private final PrivateRequestService privateRequestService;
@@ -55,7 +60,7 @@ public class PrivateEventService {
         Event event = findEvent(userId, eventId);
 
         if (event.getState().equals(PUBLISHED)) {
-            throw new ValidationException("not published");
+            throw new ConflictException("not published");
         }
         if (data.getEventDate() != null
                 && data.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
@@ -84,50 +89,53 @@ public class PrivateEventService {
                 .toList();
     }
 
-    public Boolean isParticipantLimitEmpty(Event event) {
+    public Boolean isParticipantLimitIsEmpty(Event event) {
         return event.getParticipantLimit()
                 <= privateRequestService.getCountRequestByEventAndStatus(event.getId(), CONFIRMED);
     }
 
-    public EventRequestStatusUpdateResult updateRequest(
-            long userId,
-            long eventId,
-            EventRequestStatusUpdateRequest data) {
-
+    public EventRequestStatusUpdateResult updateRequest(long userId, long eventId,
+                                                        EventRequestStatusUpdateRequest data) {
         EventRequestStatusUpdateResult result = EventRequestStatusUpdateResult.builder().build();
         Event event = findEvent(userId, eventId);
         RequestStatus status = data.getStatus();
-        List<ParticipationRequestDto> requests = findRequestsOnUserEvent(eventId)
-//                findRequests(userId, eventId)
+
+        List<Request> requestList = requestRepository.findAllByEventId(eventId)
                 .stream()
                 .filter(request -> data.getRequestIds().contains(request.getId()))
                 .toList();
 
-        if (isParticipantLimitEmpty(event) && status.equals(CONFIRMED)) {
-            throw new ValidationException("limit empty");
+        if (isParticipantLimitIsEmpty(event) && status.equals(CONFIRMED)) {
+            throw new ConflictException("limit empty");
         }
 
-        if (event.getRequestModeration().equals(false) || isParticipantLimitEmpty(event)) {
+        if (event.getRequestModeration().equals(false) || isParticipantLimitIsEmpty(event)) {
             if (status.equals(REJECTED)) {
-                requests.forEach(request -> {
+                requestList.forEach(request -> {
+                    if (request.getStatus().equals(CONFIRMED)) {
+                        throw new ConflictException("cant reject confirmed request");
+                    }
+
                     request.setStatus(status);
-                    result.getRejectedRequests().add(request);
+                    requestRepository.save(request);
+                    result.getRejectedRequests().add(toParticipationRequestDto(request));
                 });
-                return result;
             }
         }
 
-        if (!isParticipantLimitEmpty(event) && status.equals(CONFIRMED)) {
-            for (ParticipationRequestDto request : requests) {
+        if (!isParticipantLimitIsEmpty(event) && status.equals(CONFIRMED)) {
+            for (Request request : requestList) {
+                if (isParticipantLimitIsEmpty(event)) {
+                    request.setStatus(REJECTED);
+                    requestRepository.save(request);
+                    result.getRejectedRequests().add(toParticipationRequestDto(request));
+                }
                 if (!request.getStatus().equals(PENDING)) {
                     throw new ValidationException("only pending");
                 }
                 request.setStatus(status);
-                result.getConfirmedRequests().add(request);
-                if (isParticipantLimitEmpty(event)) {
-                    request.setStatus(REJECTED);
-                    result.getRejectedRequests().add(request);
-                }
+                requestRepository.save(request);
+                result.getConfirmedRequests().add(toParticipationRequestDto(request));
             }
         }
         return result;

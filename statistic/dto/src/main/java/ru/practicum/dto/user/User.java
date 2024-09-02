@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Table(name = "users")
@@ -28,12 +30,14 @@ public class User {
     @NotBlank
     @NotEmpty
     @Column(name = "name")
+    @Length(min = 2, max = 250)
     private String name;
 
     @NotNull
     @NotBlank
     @NotEmpty
     @Email
+    @Length(min = 6, max = 254)
     @Column(name = "email")
     private String email;
 }

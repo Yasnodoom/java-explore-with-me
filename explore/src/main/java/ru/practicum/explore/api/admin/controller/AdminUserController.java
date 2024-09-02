@@ -18,8 +18,10 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
 
     @GetMapping
-    public List<User> get(@RequestParam List<Long> ids) {
-        return adminUserService.getAll(ids);
+    public List<User> get(@RequestParam(required = false) List<Long> ids,
+                          @RequestParam(defaultValue = "0") Integer from,
+                          @RequestParam(defaultValue = "10") Integer size) {
+        return adminUserService.getAll(ids, from, size);
     }
 
     @PostMapping

@@ -20,6 +20,7 @@ public class ParticipationRequestDto {
 
     @JsonProperty("requester")
     private Long requesterId;
+
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 

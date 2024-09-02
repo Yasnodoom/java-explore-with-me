@@ -10,6 +10,7 @@ import ru.practicum.dto.request.mapper.RequestMapper;
 import ru.practicum.dto.user.User;
 import ru.practicum.explore.api.admin.service.AdminEventService;
 import ru.practicum.explore.api.admin.service.AdminUserService;
+import ru.practicum.explore.exception.ConflictException;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.storage.RequestRepository;
@@ -81,22 +82,25 @@ public class PrivateRequestService {
         User requester = request.getRequester();
 
         if (!event.getState().equals(PUBLISHED)) {
-            throw new ValidationException("only published");
+            throw new ConflictException("only published");
         }
-        // вроде как нужна а вроде как можно подавать
-//        requestRepository.findByRequesterUserIdAndEventId(requester.getUserId(), event.getId())
-//                .ifPresent(s -> {
-//                    throw new ValidationException("exist");
-//                });
+        requestRepository.findByRequesterUserIdAndEventId(requester.getUserId(), event.getId())
+                .stream()
+                .findAny()
+                .ifPresent(s -> {
+                    throw new ConflictException("request exist for this user");
+                });
+
         if (requester.equals(event.getInitiator())) {
-            throw new ValidationException("same user");
+            throw new ConflictException("same user");
         }
-        if (event.getParticipantLimit()
-                <= requestRepository.countByEventIdAndStatus(event.getId(), CONFIRMED)) {
-            throw new ValidationException("limit empty");
+        if (event.getParticipantLimit() == 0) {
+            request.setStatus(CONFIRMED);
+        } else {
+            if (event.getParticipantLimit()
+                    <= requestRepository.countByEventId(event.getId())) {
+                throw new ConflictException("limit empty");
+            }
         }
-//        if (!event.getRequestModeration()) {
-//            request.setStatus("ACCEPT");
-//        }
     }
 }

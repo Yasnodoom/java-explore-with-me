@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static ru.practicum.dto.event.Status.PENDING;
-import static ru.practicum.dto.event.Status.WAITING;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -69,7 +68,7 @@ public class Event {
 
     @Column(name = "published", columnDefinition = "TIMESTAMP")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime published;
+    private LocalDateTime publishedOn;
 
     @Column(name = "paid")
     @Builder.Default()

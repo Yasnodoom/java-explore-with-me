@@ -19,8 +19,8 @@ public class PublicCategoryController {
         return publicCategoryService.find(from, size);
     }
 
-    @GetMapping("/{camId}")
-    public Category getById(@PathVariable Long camId) {
-        return publicCategoryService.getById(camId);
+    @GetMapping("/{catId}")
+    public Category getById(@PathVariable Long catId) {
+        return publicCategoryService.getById(catId);
     }
 }
