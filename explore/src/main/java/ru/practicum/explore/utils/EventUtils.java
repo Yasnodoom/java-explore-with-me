@@ -17,7 +17,7 @@ public class EventUtils {
         }
         switch (stateAction) {
             case PUBLISH_EVENT -> {
-                if (event.getState().equals(PUBLISHED) || event.getState().equals(CANCELED) ) {
+                if (event.getState().equals(PUBLISHED) || event.getState().equals(CANCELED)) {
                     throw new ConflictException("already published");
                 }
                 event.setPublishedOn(LocalDateTime.now());
@@ -34,7 +34,7 @@ public class EventUtils {
     }
 
     public static void updateStatusByUser(Event event, UserStateAction action) {
-        if (action ==  null) {
+        if (action == null) {
             return;
         }
         switch (action) {

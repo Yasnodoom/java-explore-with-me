@@ -19,6 +19,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             and coalesce(:states, null) is null or e.state in (:states)
             and coalesce(:categories, null) is null or e.category_id in (:categories)
             and  coalesce(:rangeStart, null) is null or (e.event_date between :rangeStart and :rangeEnd)
+            order by e.event_date desc
             """, nativeQuery = true)
     List<Event> findAllByParams(@Param("userIds") List<Long> usersIds,
                                 @Param("states") List<String> states,

@@ -11,7 +11,6 @@ import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShotDto;
 import ru.practicum.dto.event.mapper.EventMapper;
 import ru.practicum.dto.statdata.StatData;
-import ru.practicum.explore.api.admin.service.AdminEventService;
 import ru.practicum.explore.api.closed.service.PrivateEventService;
 import ru.practicum.explore.api.closed.service.PrivateRequestService;
 import ru.practicum.explore.exception.NotFoundException;
@@ -34,7 +33,6 @@ import static ru.practicum.dto.event.mapper.EventMapper.toEventFullDto;
 @RequiredArgsConstructor
 public class PublicEventService {
     private final EventRepository eventRepository;
-    private final AdminEventService adminEventService;
     private final PrivateRequestService privateRequestService;
     private final PrivateEventService privateEventService;
 
@@ -99,7 +97,9 @@ public class PublicEventService {
     }
 
     public EventFullDto getById(HttpServletRequest request, Long id) {
-        Event event = adminEventService.findEventById(id);
+        Event event = eventRepository
+                .findById(id)
+                .orElseThrow(() -> new NotFoundException(id));
 
         if (!event.getState().equals(PUBLISHED)) {
             throw new NotFoundException(event.getId());
@@ -109,28 +109,12 @@ public class PublicEventService {
 
         EventFullDto eventFullDto = toEventFullDto(event);
         eventFullDto.setConfirmedRequests(confirmRequests);
-
-
-
         eventFullDto.setViews(statDataService.getRequestHits(request.getRequestURI()));
 
-//        Map<String, Object> parameters = new HashMap<>();
-//        parameters.put("start", LocalDateTime.now().minusMonths(1));
-//        parameters.put("end", LocalDateTime.now().plusMonths(1));
-//        parameters.put("unique", true);
-//        parameters.put("uris", request.getRequestURI());
-//        List<StatData> stat = fuckinService.getStat(parameters);
-//
-//        if (stat.isEmpty()) {
-//            eventFullDto.setViews(0);
-//        } else {
-//            eventFullDto.setViews(stat.get(0).getHits());
-//        }
         statService.logRequest(request);
 
         return eventFullDto;
     }
-
 
 
 }

@@ -90,7 +90,7 @@ public class PrivateRequestService {
             throw new ConflictException("only published");
         }
         if (event.getParticipantLimit() != 0
-                && event.getParticipantLimit() <= requestRepository.countByEventIdAndStatus(event.getId(), CONFIRMED)){
+                && event.getParticipantLimit() <= requestRepository.countByEventIdAndStatus(event.getId(), CONFIRMED)) {
             throw new ConflictException("limit empty");
         }
 
