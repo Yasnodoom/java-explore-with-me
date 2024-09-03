@@ -69,7 +69,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - stats-server
+      - ewm-db
     environment:
       - STATISTIC_SERVICE_URL=http://stats-service:8081
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/explore
