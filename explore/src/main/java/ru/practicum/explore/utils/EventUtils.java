@@ -25,7 +25,7 @@ public class EventUtils {
             }
             case REJECT_EVENT -> {
                 if (event.getState().equals(PUBLISHED)) {
-                    throw new ConflictException("mes1");
+                    throw new ConflictException("cant reject published");
                 }
                 event.setState(CANCELED);
             }

@@ -19,7 +19,7 @@ public class ErrorHandler {
         final ApiError error = ApiError.builder()
                 .errors(Arrays.stream(e.getStackTrace()).toList())
                 .message(e.getMessage())
-                .reason("reason")
+                .reason(e.getMessage())
                 .status(HttpStatus.NOT_FOUND.name())
                 .build();
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
@@ -30,7 +30,7 @@ public class ErrorHandler {
         final ApiError error = ApiError.builder()
                 .errors(Arrays.stream(e.getStackTrace()).toList())
                 .message(e.getMessage())
-                .reason("reason")
+                .reason(e.getMessage())
                 .status(HttpStatus.BAD_REQUEST.name())
                 .build();
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
@@ -41,7 +41,7 @@ public class ErrorHandler {
         final ApiError error = ApiError.builder()
                 .errors(Arrays.stream(e.getStackTrace()).toList())
                 .message(e.getMessage())
-                .reason("reason")
+                .reason(e.getMessage())
                 .status(HttpStatus.CONFLICT.name())
                 .build();
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
@@ -52,7 +52,7 @@ public class ErrorHandler {
         final ApiError error = ApiError.builder()
                 .errors(Arrays.stream(e.getStackTrace()).toList())
                 .message(e.getMessage())
-                .reason("reason")
+                .reason("constraint violation exception")
                 .status(HttpStatus.BAD_REQUEST.name())
                 .build();
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);

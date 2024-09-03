@@ -1,5 +1,6 @@
 package ru.practicum.explore.api.admin.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,8 @@ public class AdminEventController {
     private final AdminEventService service;
 
     @GetMapping
-    public List<EventFullDto> findAll(@RequestParam(required = false) List<Long> users,
+    public List<EventFullDto> findAll(HttpServletRequest request,
+                                      @RequestParam(required = false) List<Long> users,
                                       @RequestParam(required = false) List<String> states,
                                       @RequestParam(required = false) List<Long> categories,
                                       @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -26,7 +28,7 @@ public class AdminEventController {
                                       LocalDateTime rangeEnd,
                                       @RequestParam(defaultValue = "0") Integer from,
                                       @RequestParam(defaultValue = "10") Integer size) {
-        return service.findAll(users, states, categories, rangeStart, rangeEnd, from, size);
+        return service.findAll(request, users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @PatchMapping("/{eventId}")

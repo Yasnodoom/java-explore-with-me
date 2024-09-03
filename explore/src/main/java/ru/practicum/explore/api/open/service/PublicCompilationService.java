@@ -19,7 +19,6 @@ import static ru.practicum.dto.compilation.mapper.CompilationMapper.toCompilatio
 @RequiredArgsConstructor
 public class PublicCompilationService {
     private final CompilationRepository compilationRepository;
-    //удалить
     private final EventRepository eventRepository;
 
     public List<CompilationDto> find(Boolean pinned, Integer from, Integer size) {

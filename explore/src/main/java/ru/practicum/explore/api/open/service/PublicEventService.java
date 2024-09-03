@@ -16,7 +16,7 @@ import ru.practicum.explore.api.closed.service.PrivateEventService;
 import ru.practicum.explore.api.closed.service.PrivateRequestService;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.exception.ValidationException;
-import ru.practicum.explore.stat.FuckinService;
+import ru.practicum.explore.stat.StatDataService;
 import ru.practicum.explore.stat.StatService;
 import ru.practicum.explore.storage.EventRepository;
 
@@ -38,9 +38,8 @@ public class PublicEventService {
     private final PrivateRequestService privateRequestService;
     private final PrivateEventService privateEventService;
 
-
     private final StatService statService;
-    private final FuckinService fuckinService;
+    private final StatDataService statDataService;
 
     public List<EventShotDto> find(HttpServletRequest request, String text, List<Long> categories, Boolean paid,
                                    LocalDateTime rangeStart, LocalDateTime rangeEnd,
@@ -76,18 +75,24 @@ public class PublicEventService {
                 privateRequestService.getCountRequestByEventAndStatus(el.getId(), CONFIRMED)));
 
 
+        // fucki
+//        eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
+
+
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("start", rangeStart);
         parameters.put("end", rangeEnd);
         parameters.put("unique", false);
         parameters.put("uris", request.getRequestURI());
-        List<StatData> stat = fuckinService.getStat(parameters);
+        List<StatData> stat = statDataService.getStat(parameters);
 
         if (stat.isEmpty()) {
             eventShotDtoList.forEach(el -> el.setViews(0));
         } else {
             eventShotDtoList.forEach(el -> el.setViews(stat.get(0).getHits()));
         }
+
+
         statService.logRequest(request);
 
         return eventShotDtoList;
@@ -100,26 +105,32 @@ public class PublicEventService {
             throw new NotFoundException(event.getId());
         }
 
-        int confirmRequests = privateRequestService
-                .getCountRequestByEventAndStatus(event.getId(), CONFIRMED);
+        int confirmRequests = privateRequestService.getCountRequestByEventAndStatus(event.getId(), CONFIRMED);
 
         EventFullDto eventFullDto = toEventFullDto(event);
         eventFullDto.setConfirmedRequests(confirmRequests);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", LocalDateTime.now().minusMonths(1));
-        parameters.put("end", LocalDateTime.now().plusMonths(1));
-        parameters.put("unique", true);
-        parameters.put("uris", request.getRequestURI());
-        List<StatData> stat = fuckinService.getStat(parameters);
 
-        if (stat.isEmpty()) {
-            eventFullDto.setViews(0);
-        } else {
-            eventFullDto.setViews(stat.get(0).getHits());
-        }
+
+        eventFullDto.setViews(statDataService.getRequestHits(request.getRequestURI()));
+
+//        Map<String, Object> parameters = new HashMap<>();
+//        parameters.put("start", LocalDateTime.now().minusMonths(1));
+//        parameters.put("end", LocalDateTime.now().plusMonths(1));
+//        parameters.put("unique", true);
+//        parameters.put("uris", request.getRequestURI());
+//        List<StatData> stat = fuckinService.getStat(parameters);
+//
+//        if (stat.isEmpty()) {
+//            eventFullDto.setViews(0);
+//        } else {
+//            eventFullDto.setViews(stat.get(0).getHits());
+//        }
         statService.logRequest(request);
 
         return eventFullDto;
     }
+
+
+
 }

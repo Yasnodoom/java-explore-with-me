@@ -18,16 +18,15 @@ import java.util.List;
 public class PublicEventController {
     private final PublicEventService publicEventService;
 
-
     @GetMapping
     public List<EventShotDto> find(HttpServletRequest request,
                                    @RequestParam(required = false) String text,
                                    @RequestParam(required = false) List<Long> categories,
                                    @RequestParam(required = false) Boolean paid,
                                    @RequestParam(required = false)
-                                       @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                    @RequestParam(required = false)
-                                       @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                    @RequestParam(required = false) Boolean onlyAvailable,
                                    @RequestParam(required = false, defaultValue = "EVENT_DATE") SortType sort,
                                    @RequestParam(defaultValue = "0") Integer from,

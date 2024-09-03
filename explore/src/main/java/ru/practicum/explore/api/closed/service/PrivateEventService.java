@@ -73,14 +73,6 @@ public class PrivateEventService {
         return eventRepository.save(event);
     }
 
-    public List<ParticipationRequestDto> findRequests(long userId, long eventId) {
-        return privateRequestService
-                .findByRequesterAndEvent(userId, eventId)
-                .stream()
-                .map(RequestMapper::toParticipationRequestDto)
-                .toList();
-    }
-
     public List<ParticipationRequestDto> findRequestsOnUserEvent(long eventId) {
         return privateRequestService
                 .findAllByEventId(eventId)

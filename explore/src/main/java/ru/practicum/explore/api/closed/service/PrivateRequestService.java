@@ -70,9 +70,6 @@ public class PrivateRequestService {
         return toParticipationRequestDto(requestRepository.save(request));
     }
 
-    public List<Request> findByRequesterAndEvent(long userId, long eventId) {
-        return requestRepository.findByRequesterUserIdAndEventId(userId, eventId);
-    }
 
     public List<Request> findAllByEventId(long eventId) {
         return requestRepository.findAllByEventId(eventId);

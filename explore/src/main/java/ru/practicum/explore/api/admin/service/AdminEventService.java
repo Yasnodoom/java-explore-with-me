@@ -1,5 +1,6 @@
 package ru.practicum.explore.api.admin.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -7,12 +8,17 @@ import ru.practicum.dto.event.Event;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.event.mapper.EventMapper;
+import ru.practicum.dto.statdata.StatData;
 import ru.practicum.explore.exception.NotFoundException;
+import ru.practicum.explore.stat.StatDataService;
+import ru.practicum.explore.stat.StatService;
 import ru.practicum.explore.storage.EventRepository;
 import ru.practicum.explore.storage.RequestRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ru.practicum.dto.enums.RequestStatus.CONFIRMED;
 import static ru.practicum.explore.utils.EventUtils.updateStatusByAdmin;
@@ -23,13 +29,18 @@ public class AdminEventService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
 
+    private final StatDataService statDataService;
+    private final StatService statService;
+
+
     public Event findEventById(Long eventId) {
         return eventRepository
                 .findById(eventId)
                 .orElseThrow(() -> new NotFoundException(eventId));
     }
 
-    public List<EventFullDto> findAll(List<Long> users,
+    public List<EventFullDto> findAll(HttpServletRequest request,
+                                      List<Long> users,
                                       List<String> states,
                                       List<Long> categories,
                                       LocalDateTime rangeStart,
@@ -38,22 +49,40 @@ public class AdminEventService {
                                       Integer size) {
         List<Event> events = eventRepository.findAllByParams(users, states, categories,
                 rangeStart, rangeEnd, PageRequest.of(from, size));
-//        if (users == null && states == null) {
-//            events = eventRepository.findAllEvents(PageRequest.of(from, size));
-//        } else {
-//            events = eventRepository
-//                    .findAllByInitiatorUserIdInAndStateInAndCategoryIdInAndEventDateBetween(
-//                            users, states, categories, rangeStart, rangeEnd, PageRequest.of(from, size));
-//        }
+
+        if (categories != null) {
+            events.removeIf(el -> !categories.contains(el.getCategory().getId()));
+        }
 
         List<EventFullDto> eventsFullDto = events
                 .stream()
                 .map(EventMapper::toEventFullDto)
                 .toList();
 
-        eventsFullDto.forEach(e -> e.setViews(777));
+// hyeta
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("start", LocalDateTime.now().minusMonths(1));
+        parameters.put("end", LocalDateTime.now().plusMonths(1));
+        parameters.put("unique", true);
+        parameters.put("uris", request.getRequestURI());
+
+        List<StatData> stats = statDataService.getStat(parameters);
+
+        if (stats.isEmpty()) {
+            eventsFullDto.forEach(e -> e.setViews(0));
+        } else {
+
+            eventsFullDto.forEach(e -> e.setViews(stats.get(0).getHits()));
+        }
+
+//        eventsFullDto.forEach(e -> e.setViews(statDataService.getRequestHits(request.getRequestURI())));
+
+
         eventsFullDto.forEach(e -> e.setConfirmedRequests(
                 requestRepository.countByEventIdAndStatus(e.getId(), CONFIRMED)));
+
+
+        statService.logRequest(request);
 
         return eventsFullDto;
     }

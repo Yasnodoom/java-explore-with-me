@@ -15,9 +15,6 @@ public class AdminUserService {
     private final UserRepository userRepository;
 
     public List<User> getAll(List<Long> ids, Integer from, Integer size) {
-        if (ids == null) {
-            return userRepository.findAllUsers(PageRequest.of(from, size));
-        }
         return userRepository.findAllByUserIdIn(ids, PageRequest.of(from, size));
     }
 

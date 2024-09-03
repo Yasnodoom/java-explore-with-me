@@ -30,5 +30,4 @@ public class PrivateRequestController {
     public ParticipationRequestDto cancel(@PathVariable Long userId, @PathVariable Long requestId) {
         return privateRequestService.cancel(userId, requestId);
     }
-
 }
