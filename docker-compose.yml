@@ -19,8 +19,6 @@ services:
       - "5431"
     ports:
       - "5431:5431"
-    #    volumes:
-    #      - ./volumes/postgres:/var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=statistic
       - POSTGRES_USER=dbuser
@@ -50,8 +48,8 @@ services:
       - "5432"
     ports:
       - "5432:5432"
-    #    volumes:
-    #      - ./volumes/postgres:/var/lib/postgresql/data/
+    depends_on:
+      - stats-service
     environment:
       - POSTGRES_DB=explore
       - POSTGRES_USER=dbuser
@@ -69,7 +67,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - stats-server
+      - ewm-db
     environment:
       - STATISTIC_SERVICE_URL=http://stats-service:8081
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/explore
