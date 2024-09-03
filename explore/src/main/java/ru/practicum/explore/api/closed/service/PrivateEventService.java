@@ -98,44 +98,38 @@ public class PrivateEventService {
                                                         EventRequestStatusUpdateRequest data) {
         EventRequestStatusUpdateResult result = EventRequestStatusUpdateResult.builder().build();
         Event event = findEvent(userId, eventId);
-        RequestStatus status = data.getStatus();
+        RequestStatus newRequestStatus = data.getStatus();
 
-        List<Request> requestList = requestRepository.findAllByEventId(eventId)
+        List<Request> requests = requestRepository.findAllByEventId(eventId)
                 .stream()
                 .filter(request -> data.getRequestIds().contains(request.getId()))
                 .toList();
 
-        if (isParticipantLimitIsEmpty(event) && status.equals(CONFIRMED)) {
+        if (event.getParticipantLimit() == 0 || event.getRequestModeration().equals(false)) {
+            return result;
+        }
+
+        if (isParticipantLimitIsEmpty(event)) {
             throw new ConflictException("limit empty");
         }
 
-        if (event.getRequestModeration().equals(false) || isParticipantLimitIsEmpty(event)) {
-            if (status.equals(REJECTED)) {
-                requestList.forEach(request -> {
-                    if (request.getStatus().equals(CONFIRMED)) {
-                        throw new ConflictException("cant reject confirmed request");
-                    }
-
-                    request.setStatus(status);
-                    requestRepository.save(request);
-                    result.getRejectedRequests().add(toParticipationRequestDto(request));
-                });
+        for (Request r : requests) {
+            if (!r.getStatus().equals(PENDING)) {
+                throw new ConflictException("change status can on only in pending");
             }
-        }
+            if (isParticipantLimitIsEmpty(event)) {
+                r.setStatus(REJECTED);
+                requestRepository.save(r);
+                result.getRejectedRequests().add(toParticipationRequestDto(r));
+            }
 
-        if (!isParticipantLimitIsEmpty(event) && status.equals(CONFIRMED)) {
-            for (Request request : requestList) {
-                if (isParticipantLimitIsEmpty(event)) {
-                    request.setStatus(REJECTED);
-                    requestRepository.save(request);
-                    result.getRejectedRequests().add(toParticipationRequestDto(request));
-                }
-                if (!request.getStatus().equals(PENDING)) {
-                    throw new ValidationException("only pending");
-                }
-                request.setStatus(status);
-                requestRepository.save(request);
-                result.getConfirmedRequests().add(toParticipationRequestDto(request));
+            r.setStatus(newRequestStatus);
+            requestRepository.save(r);
+
+            if (newRequestStatus.equals(REJECTED)) {
+                result.getRejectedRequests().add(toParticipationRequestDto(r));
+            } else {
+                result.getConfirmedRequests().add(toParticipationRequestDto(r));
             }
         }
         return result;

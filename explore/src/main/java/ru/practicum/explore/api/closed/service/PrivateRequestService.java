@@ -30,12 +30,17 @@ public class PrivateRequestService {
     private final AdminEventService adminEventService;
 
     public ParticipationRequestDto create(Long userId, Long eventId) {
+        Event event = adminEventService.findEventById(eventId);
         Request request = Request.builder()
                 .requester(adminUserService.getUserById(userId))
-                .event(adminEventService.findEventById(eventId))
+                .event(event)
                 .build();
 
         validateRequest(request);
+
+        if (event.getRequestModeration().equals(false) || event.getParticipantLimit() == 0) {
+            request.setStatus(CONFIRMED);
+        }
 
         return toParticipationRequestDto(requestRepository.save(request));
     }
@@ -81,26 +86,22 @@ public class PrivateRequestService {
         Event event = request.getEvent();
         User requester = request.getRequester();
 
+        if (requester.equals(event.getInitiator())) {
+            throw new ConflictException("same user");
+        }
         if (!event.getState().equals(PUBLISHED)) {
             throw new ConflictException("only published");
         }
+        if (event.getParticipantLimit() != 0
+                && event.getParticipantLimit() <= requestRepository.countByEventIdAndStatus(event.getId(), CONFIRMED)){
+            throw new ConflictException("limit empty");
+        }
+
         requestRepository.findByRequesterUserIdAndEventId(requester.getUserId(), event.getId())
                 .stream()
                 .findAny()
                 .ifPresent(s -> {
                     throw new ConflictException("request exist for this user");
                 });
-
-        if (requester.equals(event.getInitiator())) {
-            throw new ConflictException("same user");
-        }
-        if (event.getParticipantLimit() == 0) {
-            request.setStatus(CONFIRMED);
-        } else {
-            if (event.getParticipantLimit()
-                    <= requestRepository.countByEventId(event.getId())) {
-                throw new ConflictException("limit empty");
-            }
-        }
     }
 }

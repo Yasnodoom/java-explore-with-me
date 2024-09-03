@@ -13,19 +13,20 @@ import java.util.Optional;
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByInitiatorUserId(Long userId, Pageable pageable);
 
-//    @Query(value = """
-//            select * from events e
-//            where :userIds is null or e.initiator_id in (:userIds)
-//            and :states is null or e.state in (:states)
-//            and :categories is null or e.category_id in (:categories)
-//            and  cast(cast(:rangeStart as text) as timestamp) is null or e.event_date between cast(cast(:rangeStart as text) as timestamp) and cast(cast(:rangeEnd as text) as timestamp)
-//            """, nativeQuery = true)
-//    List<Event> finaAllByParams(@Param("userIds") List<Long> usersIds,
-//                                @Param("states") List<String> states,
-//                                @Param("categories") List<Long> categories,
-//                                @Param("rangeStart") LocalDateTime rangeStart,
-//                                @Param("rangeEnd") LocalDateTime rangeEnd,
-//                                Pageable pageable);
+    @Query(value = """
+            select * from events e
+            where coalesce(:userIds, null) is null or e.initiator_id in (:userIds)
+            and coalesce(:states, null) is null or e.state in (:states)
+            and coalesce(:categories, null) is null or e.category_id in (:categories)
+            and  coalesce(:rangeStart, null) is null or (e.event_date between :rangeStart and :rangeEnd)
+            order by e.event_date desc
+            """, nativeQuery = true)
+    List<Event> findAllByParams(@Param("userIds") List<Long> usersIds,
+                                @Param("states") List<String> states,
+                                @Param("categories") List<Long> categories,
+                                @Param("rangeStart") LocalDateTime rangeStart,
+                                @Param("rangeEnd") LocalDateTime rangeEnd,
+                                Pageable pageable);
 
     List<Event> findAllByInitiatorUserIdInAndStateInAndCategoryIdInAndEventDateBetween(
             List<Long> users,

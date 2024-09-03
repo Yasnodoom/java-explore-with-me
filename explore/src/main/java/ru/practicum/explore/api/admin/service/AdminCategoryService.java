@@ -3,8 +3,8 @@ package ru.practicum.explore.api.admin.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.category.Category;
-import ru.practicum.explore.storage.CategoryRepository;
 import ru.practicum.explore.exception.NotFoundException;
+import ru.practicum.explore.storage.CategoryRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +20,9 @@ public class AdminCategoryService {
     }
 
     public Category patch(long id, Category data) {
-        Category category = repository
-                .findById(id)
-                .orElseThrow(() -> new NotFoundException(id));
+        Category category = findById(id);
         category.setName(data.getName());
+
         return repository.save(category);
     }
 

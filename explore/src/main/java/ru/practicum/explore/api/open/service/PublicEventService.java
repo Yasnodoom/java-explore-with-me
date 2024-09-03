@@ -57,10 +57,10 @@ public class PublicEventService {
 
         if (rangeStart == null || rangeEnd == null) {
             events = eventRepository.findByParamsWithoutTimeRage(text, categories, paid,
-                    PageRequest.of(from, size, Sort.by(sort.name())));
+                    PageRequest.of(from, size, Sort.by(sort.name()).descending()));
         } else {
             events = eventRepository.findByParams(text, categories, paid, rangeStart,
-                    rangeEnd, PageRequest.of(from, size, Sort.by(sort.name())));
+                    rangeEnd, PageRequest.of(from, size, Sort.by(sort.name()).descending()));
         }
 
         if (onlyAvailable != null && onlyAvailable) {

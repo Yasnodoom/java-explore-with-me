@@ -8,7 +8,6 @@ import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.event.mapper.EventMapper;
 import ru.practicum.explore.exception.NotFoundException;
-import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.storage.EventRepository;
 import ru.practicum.explore.storage.RequestRepository;
 
@@ -37,15 +36,15 @@ public class AdminEventService {
                                       LocalDateTime rangeEnd,
                                       Integer from,
                                       Integer size) {
-        List<Event> events;
-        // cast
-        if (users == null && states == null) {
-            events = eventRepository.findAllEvents(PageRequest.of(from, size));
-        } else {
-            events = eventRepository
-                    .findAllByInitiatorUserIdInAndStateInAndCategoryIdInAndEventDateBetween(
-                            users, states, categories, rangeStart, rangeEnd, PageRequest.of(from, size));
-        }
+        List<Event> events = eventRepository.findAllByParams(users, states, categories,
+                rangeStart, rangeEnd, PageRequest.of(from, size));
+//        if (users == null && states == null) {
+//            events = eventRepository.findAllEvents(PageRequest.of(from, size));
+//        } else {
+//            events = eventRepository
+//                    .findAllByInitiatorUserIdInAndStateInAndCategoryIdInAndEventDateBetween(
+//                            users, states, categories, rangeStart, rangeEnd, PageRequest.of(from, size));
+//        }
 
         List<EventFullDto> eventsFullDto = events
                 .stream()
@@ -68,11 +67,5 @@ public class AdminEventService {
         fullEventDto.setConfirmedRequests(requestRepository.countByEventIdAndStatus(eventId, CONFIRMED));
 
         return fullEventDto;
-    }
-
-    private void validateData(UpdateEventAdminRequest data) {
-        if (data.getEventDate() != null && data.getEventDate().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("date " + data.getEventDate() + " has already arrived");
-        }
     }
 }
