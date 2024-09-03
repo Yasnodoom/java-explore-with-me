@@ -61,7 +61,7 @@ services:
       retries: 10
 
   ewm-service:
-    build: ./explore/client
+    build: ./explore
     image: explore
     container_name: explore
     ports:
