@@ -56,11 +56,11 @@ public class AdminEventService {
                 .map(EventMapper::toEventFullDto)
                 .toList();
 
-        eventsFullDto.forEach(e -> e.setViews(statDataService.getRequestHits(request.getRequestURI())));
         eventsFullDto.forEach(e -> e.setConfirmedRequests(
                 requestRepository.countByEventIdAndStatus(e.getId(), CONFIRMED)));
 
         statService.logRequest(request);
+        eventsFullDto.forEach(e -> e.setViews(statDataService.getRequestHits(request.getRequestURI())));
 
         return eventsFullDto;
     }

@@ -71,7 +71,6 @@ public class PublicEventService {
 
 
         // fucki
-        eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
 
 
 //        Map<String, Object> parameters = new HashMap<>();
@@ -89,6 +88,7 @@ public class PublicEventService {
 
 
         statService.logRequest(request);
+        eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
 
         return eventShotDtoList;
     }
@@ -106,9 +106,9 @@ public class PublicEventService {
 
         EventFullDto eventFullDto = toEventFullDto(event);
         eventFullDto.setConfirmedRequests(confirmRequests);
-        eventFullDto.setViews(statDataService.getRequestHits(request.getRequestURI()));
 
         statService.logRequest(request);
+        eventFullDto.setViews(statDataService.getRequestHits(request.getRequestURI()));
 
         return eventFullDto;
     }
