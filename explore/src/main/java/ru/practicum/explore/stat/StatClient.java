@@ -19,7 +19,7 @@ public class StatClient {
     protected final RestTemplate rest;
 
     @Autowired
-    public StatClient(@Value("${statistic-service.url}") String serverUrl) {
+    public StatClient(@Value("${statistic-server.url}") String serverUrl) {
         rest = new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())

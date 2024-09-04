@@ -25,7 +25,7 @@ public class StatDataService {
     private final RestTemplate restTemplate;
 
     @Autowired
-    public StatDataService(@Value("${statistic-service.url}") String serverUrl) {
+    public StatDataService(@Value("${statistic-server.url}") String serverUrl) {
         restTemplate = new RestTemplateBuilder()
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
