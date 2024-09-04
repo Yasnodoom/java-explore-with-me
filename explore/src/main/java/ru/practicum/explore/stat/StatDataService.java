@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.statdata.StatData;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,13 +45,16 @@ public class StatDataService {
                         },
                         parameters
                 );
+        if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("error saving the log");
+        }
         return responseEntity.getBody();
     }
 
     public Integer getRequestHits(String requestURI) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", LocalDateTime.now().minusMonths(1));
-        parameters.put("end", LocalDateTime.now().plusMonths(1));
+        parameters.put("start", null);
+        parameters.put("end", null);
         parameters.put("unique", true);
         parameters.put("uris", requestURI);
 

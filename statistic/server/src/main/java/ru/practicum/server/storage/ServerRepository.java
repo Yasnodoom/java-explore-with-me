@@ -27,7 +27,7 @@ public interface ServerRepository extends JpaRepository<LogEvent, Long> {
             SELECT e.app, e.uri, COUNT(distinct e.ip) AS hits
             FROM log_events e
             WHERE e.timestamp BETWEEN cast(:start AS timestamp) AND cast(:end AS timestamp)
-            AND (:uris is null or e.uri IN (:uris))
+            AND coalesce(:uris, null) is null or e.uri IN (:uris)
             GROUP BY e.uri, e.app
             ORDER BY hits DESC""", nativeQuery = true)
     List<ViewStats> findByParamsUniqueIp(@Param("start") LocalDateTime start,

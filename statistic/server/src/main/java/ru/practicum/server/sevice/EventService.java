@@ -20,11 +20,10 @@ public class EventService {
     }
 
     public List<ViewStats> findByParams(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        if (start == null || end == null) {
-            throw new ValidationException("date is null");
-        }
-        if (end.isAfter(start)) {
-            throw new ValidationException("end date is after start date");
+        if (start != null && end != null) {
+            if (start.isAfter(end)) {
+                throw new ValidationException("start date is after end date ");
+            }
         }
 
         if (unique) {
