@@ -1,6 +1,7 @@
 package ru.practicum.explore.api.admin.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,13 +30,13 @@ public class AdminEventService {
     private final StatDataService statDataService;
     private final StatService statService;
 
-
     public Event findEventById(Long eventId) {
         return eventRepository
                 .findById(eventId)
                 .orElseThrow(() -> new NotFoundException(eventId));
     }
 
+    @Transactional
     public List<EventFullDto> findAll(HttpServletRequest request,
                                       List<Long> users,
                                       List<String> states,
@@ -59,8 +60,8 @@ public class AdminEventService {
         eventsFullDto.forEach(e -> e.setConfirmedRequests(
                 requestRepository.countByEventIdAndStatus(e.getId(), CONFIRMED)));
 
-        statService.logRequest(request);
         eventsFullDto.forEach(e -> e.setViews(statDataService.getRequestHits(request.getRequestURI())));
+        statService.logRequest(request);
 
         return eventsFullDto;
     }

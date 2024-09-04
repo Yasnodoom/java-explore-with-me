@@ -1,6 +1,7 @@
 package ru.practicum.explore.api.open.service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -36,6 +37,7 @@ public class PublicEventService {
     private final StatService statService;
     private final StatDataService statDataService;
 
+    @Transactional
     public List<EventShotDto> find(HttpServletRequest request, String text, List<Long> categories, Boolean paid,
                                    LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                    Boolean onlyAvailable, SortType sort, Integer from, Integer size) {
@@ -87,12 +89,13 @@ public class PublicEventService {
 //        }
 
 
-        statService.logRequest(request);
         eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
+        statService.logRequest(request);
 
         return eventShotDtoList;
     }
 
+    @Transactional
     public EventFullDto getById(HttpServletRequest request, Long id) {
         Event event = eventRepository
                 .findById(id)
@@ -107,8 +110,8 @@ public class PublicEventService {
         EventFullDto eventFullDto = toEventFullDto(event);
         eventFullDto.setConfirmedRequests(confirmRequests);
 
-        statService.logRequest(request);
         eventFullDto.setViews(statDataService.getRequestHits(request.getRequestURI()));
+        statService.logRequest(request);
 
         return eventFullDto;
     }
