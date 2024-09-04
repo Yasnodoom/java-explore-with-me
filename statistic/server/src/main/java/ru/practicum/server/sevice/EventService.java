@@ -1,5 +1,6 @@
 package ru.practicum.server.sevice;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.logevent.LogEvent;
@@ -19,6 +20,13 @@ public class EventService {
     }
 
     public List<ViewStats> findByParams(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        if (start == null || end == null) {
+            throw new ValidationException("date is null");
+        }
+        if (end.isAfter(start)) {
+            throw new ValidationException("end date is after start date");
+        }
+
         if (unique) {
             return repository.findByParamsUniqueIp(start, end, uris);
         } else {

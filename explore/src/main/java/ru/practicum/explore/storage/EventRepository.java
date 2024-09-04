@@ -49,8 +49,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             select * from events e
             where :annotation is null or lower(e.annotation) like lower(:annotation)
             and e.state like 'PUBLISHED'
-            and :categories is null or e.category_id in :categories
-            and :paid is null or e.paid = :paid
+            and coalesce(:categories, null) is null or e.category_id in (:categories)
+            and coalesce(:paid, null) is null or e.paid = (:paid)
             and e.event_date > current_timestamp
             """, nativeQuery = true)
     List<Event> findByParamsWithoutTimeRage(@Param("annotation") String annotation,
