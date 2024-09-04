@@ -71,31 +71,13 @@ public class PublicEventService {
         eventShotDtoList.forEach(el -> el.setConfirmedRequests(
                 privateRequestService.getCountRequestByEventAndStatus(el.getId(), CONFIRMED)));
 
-
-        // fucki
-
-
-//        Map<String, Object> parameters = new HashMap<>();
-//        parameters.put("start", rangeStart);
-//        parameters.put("end", rangeEnd);
-//        parameters.put("unique", false);
-//        parameters.put("uris", request.getRequestURI());
-//        List<StatData> stat = statDataService.getStat(parameters);
-//
-//        if (stat.isEmpty()) {
-//            eventShotDtoList.forEach(el -> el.setViews(0));
-//        } else {
-//            eventShotDtoList.forEach(el -> el.setViews(stat.get(0).getHits()));
-//        }
-
-
         eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
-        statService.logRequest(request);
+        statDataService.logRequest(request);
 
         return eventShotDtoList;
     }
 
-    @Transactional
+
     public EventFullDto getById(HttpServletRequest request, Long id) {
         Event event = eventRepository
                 .findById(id)
@@ -109,12 +91,10 @@ public class PublicEventService {
 
         EventFullDto eventFullDto = toEventFullDto(event);
         eventFullDto.setConfirmedRequests(confirmRequests);
-
         eventFullDto.setViews(statDataService.getRequestHits(request.getRequestURI()));
-        statService.logRequest(request);
+
+        statDataService.logRequest(request);
 
         return eventFullDto;
     }
-
-
 }

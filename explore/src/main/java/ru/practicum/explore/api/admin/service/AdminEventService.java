@@ -61,7 +61,7 @@ public class AdminEventService {
                 requestRepository.countByEventIdAndStatus(e.getId(), CONFIRMED)));
 
         eventsFullDto.forEach(e -> e.setViews(statDataService.getRequestHits(request.getRequestURI())));
-        statService.logRequest(request);
+        statDataService.logRequest(request);
 
         return eventsFullDto;
     }

@@ -1,6 +1,7 @@
 package ru.practicum.explore.api.open.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 public class PublicEventController {
     private final PublicEventService publicEventService;
 
+    @Transactional
     @GetMapping
     public List<EventShotDto> find(HttpServletRequest request,
                                    @RequestParam(required = false) String text,
@@ -35,6 +37,7 @@ public class PublicEventController {
                 rangeStart, rangeEnd, onlyAvailable, sort, from, size);
     }
 
+    @Transactional
     @GetMapping("/{id}")
     public EventFullDto getById(HttpServletRequest request, @PathVariable Long id) {
         return publicEventService.getById(request, id);

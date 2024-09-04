@@ -1,5 +1,6 @@
 package ru.practicum.explore.stat;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -12,8 +13,10 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import ru.practicum.dto.logevent.LogEvent;
 import ru.practicum.dto.statdata.StatData;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,23 @@ public class StatDataService {
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(() -> new HttpComponentsClientHttpRequestFactory())
                 .build();
+    }
+
+    public void logRequest(HttpServletRequest request) {
+        LogEvent log = LogEvent.builder()
+                .app(request.getRemoteHost())
+                .ip(request.getRemoteAddr())
+                .uri(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+        HttpEntity<LogEvent> requestEntity = new HttpEntity<>(log);
+
+        ResponseEntity<LogEvent> res = restTemplate
+                .exchange("/hit", HttpMethod.POST, requestEntity, LogEvent.class);
+
+        if (!res.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("error saving the log");
+        }
     }
 
     private List<StatData> getStat(Map<String, Object> parameters) {

@@ -37,6 +37,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             and :categories is null or e.category_id in :categories
             and :paid is null or e.paid = :paid
             and coalesce(:rangeStart, null) is null or (e.event_date between :rangeStart and :rangeEnd)
+            order by e.event_date desc
             """, nativeQuery = true)
     List<Event> findByParams(@Param("annotation") String annotation,
                              @Param("categories") List<Long> categories,
@@ -52,6 +53,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             and coalesce(:categories, null) is null or e.category_id in (:categories)
             and coalesce(:paid, null) is null or e.paid = (:paid)
             and e.event_date > current_timestamp
+            order by e.event_date desc
             """, nativeQuery = true)
     List<Event> findByParamsWithoutTimeRage(@Param("annotation") String annotation,
                                             @Param("categories") List<Long> categories,
