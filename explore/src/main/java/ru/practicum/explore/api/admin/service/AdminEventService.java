@@ -11,7 +11,6 @@ import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.event.mapper.EventMapper;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.stat.StatDataService;
-import ru.practicum.explore.stat.StatService;
 import ru.practicum.explore.storage.EventRepository;
 import ru.practicum.explore.storage.RequestRepository;
 
@@ -26,9 +25,7 @@ import static ru.practicum.explore.utils.EventUtils.updateStatusByAdmin;
 public class AdminEventService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
-
     private final StatDataService statDataService;
-    private final StatService statService;
 
     public Event findEventById(Long eventId) {
         return eventRepository
@@ -36,7 +33,6 @@ public class AdminEventService {
                 .orElseThrow(() -> new NotFoundException(eventId));
     }
 
-    @Transactional
     public List<EventFullDto> findAll(HttpServletRequest request,
                                       List<Long> users,
                                       List<String> states,
@@ -59,8 +55,8 @@ public class AdminEventService {
 
         eventsFullDto.forEach(e -> e.setConfirmedRequests(
                 requestRepository.countByEventIdAndStatus(e.getId(), CONFIRMED)));
-
         eventsFullDto.forEach(e -> e.setViews(statDataService.getRequestHits(request.getRequestURI())));
+
         statDataService.logRequest(request);
 
         return eventsFullDto;

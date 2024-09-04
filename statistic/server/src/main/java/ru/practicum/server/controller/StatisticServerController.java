@@ -1,7 +1,6 @@
 package ru.practicum.server.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +22,6 @@ public class StatisticServerController {
         return eventService.save(event);
     }
 
-    @SneakyThrows
     @GetMapping("/stats")
     public List<ViewStats> stats(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                  LocalDateTime start,

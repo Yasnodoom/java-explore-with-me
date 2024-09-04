@@ -51,6 +51,25 @@ public class StatDataService {
         }
     }
 
+    public Integer getRequestHits(String requestURI) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("start", LocalDateTime.parse("1980-02-20T00:00:00"));
+        parameters.put("end", LocalDateTime.parse("2180-02-20T00:00:00"));
+        parameters.put("unique", true);
+        parameters.put("uris", requestURI);
+        List<StatData> stat = getStat(parameters);
+
+        Optional<StatData> log = stat
+                .stream()
+                .filter(el -> el.getUri().equals(requestURI))
+                .findFirst();
+        if (log.isPresent()) {
+            return log.get().getHits();
+        } else {
+            return 0;
+        }
+    }
+
     private List<StatData> getStat(Map<String, Object> parameters) {
         String path = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
         HttpHeaders headers = new HttpHeaders();
@@ -70,26 +89,4 @@ public class StatDataService {
         }
         return responseEntity.getBody();
     }
-
-    public Integer getRequestHits(String requestURI) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", null);
-        parameters.put("end", null);
-        parameters.put("unique", true);
-        parameters.put("uris", requestURI);
-
-        List<StatData> stat = getStat(parameters);
-
-        Optional<StatData> log = stat
-                .stream()
-                .filter(el -> el.getUri().equals(requestURI))
-                .findFirst();
-        if (log.isPresent()) {
-            return log.get().getHits();
-        } else {
-            return 0;
-        }
-
-    }
-
 }

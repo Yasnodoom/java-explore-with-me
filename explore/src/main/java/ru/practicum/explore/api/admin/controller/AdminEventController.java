@@ -1,6 +1,7 @@
 package ru.practicum.explore.api.admin.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import java.util.List;
 public class AdminEventController {
     private final AdminEventService service;
 
+    @Transactional
     @GetMapping
     public List<EventFullDto> findAll(HttpServletRequest request,
                                       @RequestParam(required = false) List<Long> users,

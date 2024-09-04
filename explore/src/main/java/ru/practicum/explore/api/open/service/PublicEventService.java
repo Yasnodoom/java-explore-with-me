@@ -16,7 +16,6 @@ import ru.practicum.explore.api.closed.service.PrivateRequestService;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.stat.StatDataService;
-import ru.practicum.explore.stat.StatService;
 import ru.practicum.explore.storage.EventRepository;
 
 import java.time.LocalDateTime;
@@ -33,8 +32,6 @@ public class PublicEventService {
     private final EventRepository eventRepository;
     private final PrivateRequestService privateRequestService;
     private final PrivateEventService privateEventService;
-
-    private final StatService statService;
     private final StatDataService statDataService;
 
     @Transactional
@@ -70,8 +67,8 @@ public class PublicEventService {
 
         eventShotDtoList.forEach(el -> el.setConfirmedRequests(
                 privateRequestService.getCountRequestByEventAndStatus(el.getId(), CONFIRMED)));
-
         eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
+
         statDataService.logRequest(request);
 
         return eventShotDtoList;
