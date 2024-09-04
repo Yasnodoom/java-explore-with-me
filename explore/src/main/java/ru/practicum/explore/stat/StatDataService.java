@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -30,14 +32,16 @@ public class StatDataService {
                 .build();
     }
 
-    public List<StatData> getStat(Map<String, Object> parameters) {
+    private List<StatData> getStat(Map<String, Object> parameters) {
         String path = "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
+        HttpHeaders headers = new HttpHeaders();
+        headers.clearContentHeaders();
 
         ResponseEntity<List<StatData>> responseEntity =
                 restTemplate.exchange(
                         path,
                         HttpMethod.GET,
-                        null,
+                        new HttpEntity<>(headers),
                         new ParameterizedTypeReference<>() {
                         },
                         parameters
@@ -54,19 +58,16 @@ public class StatDataService {
 
         List<StatData> stat = getStat(parameters);
 
-        if (stat.isEmpty()) {
-            return 0;
+        Optional<StatData> log = stat
+                .stream()
+                .filter(el -> el.getUri().equals(requestURI))
+                .findFirst();
+        if (log.isPresent()) {
+            return log.get().getHits();
         } else {
-            Optional<StatData> log = stat
-                    .stream()
-                    .filter(el -> el.getUri().equals(requestURI))
-                    .findFirst();
-            if (log.isPresent()) {
-                return log.get().getHits();
-            } else {
-                return 0;
-            }
+            return 0;
         }
+
     }
 
 }

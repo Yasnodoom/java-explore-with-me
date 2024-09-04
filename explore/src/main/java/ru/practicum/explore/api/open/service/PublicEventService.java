@@ -10,7 +10,6 @@ import ru.practicum.dto.event.Event;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShotDto;
 import ru.practicum.dto.event.mapper.EventMapper;
-import ru.practicum.dto.statdata.StatData;
 import ru.practicum.explore.api.closed.service.PrivateEventService;
 import ru.practicum.explore.api.closed.service.PrivateRequestService;
 import ru.practicum.explore.exception.NotFoundException;
@@ -20,9 +19,7 @@ import ru.practicum.explore.stat.StatService;
 import ru.practicum.explore.storage.EventRepository;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 import static ru.practicum.dto.enums.RequestStatus.CONFIRMED;
@@ -74,21 +71,21 @@ public class PublicEventService {
 
 
         // fucki
-//        eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
+        eventShotDtoList.forEach(el -> el.setViews(statDataService.getRequestHits(request.getRequestURI())));
 
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", rangeStart);
-        parameters.put("end", rangeEnd);
-        parameters.put("unique", false);
-        parameters.put("uris", request.getRequestURI());
-        List<StatData> stat = statDataService.getStat(parameters);
-
-        if (stat.isEmpty()) {
-            eventShotDtoList.forEach(el -> el.setViews(0));
-        } else {
-            eventShotDtoList.forEach(el -> el.setViews(stat.get(0).getHits()));
-        }
+//        Map<String, Object> parameters = new HashMap<>();
+//        parameters.put("start", rangeStart);
+//        parameters.put("end", rangeEnd);
+//        parameters.put("unique", false);
+//        parameters.put("uris", request.getRequestURI());
+//        List<StatData> stat = statDataService.getStat(parameters);
+//
+//        if (stat.isEmpty()) {
+//            eventShotDtoList.forEach(el -> el.setViews(0));
+//        } else {
+//            eventShotDtoList.forEach(el -> el.setViews(stat.get(0).getHits()));
+//        }
 
 
         statService.logRequest(request);
