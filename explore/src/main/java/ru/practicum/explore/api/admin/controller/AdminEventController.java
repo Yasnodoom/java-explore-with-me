@@ -5,21 +5,27 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.comment.CommentFullDto;
+import ru.practicum.dto.enums.CommentStatus;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.explore.api.admin.service.AdminEventService;
+import ru.practicum.explore.api.closed.service.CommentService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/events")
+@RequestMapping("/admin")
 public class AdminEventController {
     private final AdminEventService service;
+    private final CommentService commentService;
 
     @Transactional
-    @GetMapping
+    @GetMapping("/events")
     public List<EventFullDto> findAll(HttpServletRequest request,
                                       @RequestParam(required = false) List<Long> users,
                                       @RequestParam(required = false) List<String> states,
@@ -33,9 +39,24 @@ public class AdminEventController {
         return service.findAll(request, users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
-    @PatchMapping("/{eventId}")
+    @PatchMapping("/events/{eventId}")
     public EventFullDto patch(@PathVariable long eventId,
                               @RequestBody final UpdateEventAdminRequest data) {
         return service.updateEvent(eventId, data);
     }
+
+    @DeleteMapping("/comments/{commentId}")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteComment(@PathVariable(name = "commentId") long commentId) {
+        commentService.deleteCommentById(commentId);
+    }
+
+    @PatchMapping("/comments/{commentId}")
+    public CommentFullDto updateCommentStatus(
+            @PathVariable(name = "commentId") long commentId,
+            @RequestParam CommentStatus newStatus) {
+        return service.updateCommentStatus(commentId, newStatus);
+    }
 }
+// любой пользователь подает жалобу на комент
+// админ может либо удалить комент либо удалить жалобу

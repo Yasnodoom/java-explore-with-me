@@ -3,6 +3,9 @@ package ru.practicum.explore.api.closed.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.comment.CommentFullDto;
+import ru.practicum.dto.comment.NewCommentDto;
+import ru.practicum.dto.comment.UpdateCommentDto;
 import ru.practicum.dto.event.Event;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
@@ -13,7 +16,7 @@ import ru.practicum.explore.api.closed.service.PrivateEventService;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,5 +61,36 @@ public class PrivateEventController {
             @PathVariable(name = "eventId") long eventId,
             @Valid @RequestBody final EventRequestStatusUpdateRequest data) {
         return service.updateRequest(userId, eventId, data);
+    }
+
+    @PostMapping("/{userId}/comments")
+    @ResponseStatus(CREATED)
+    public CommentFullDto createComment(
+            @PathVariable long userId,
+            @Valid @RequestBody final NewCommentDto data) {
+        return service.createComment(userId, data);
+    }
+
+    @GetMapping("/{userId}/comments/{commentId}")
+    public CommentFullDto getComment(
+            @PathVariable(name = "userId") long userId,
+            @PathVariable(name = "commentId") long commentId) {
+        return service.getComment(userId, commentId);
+    }
+
+    @PatchMapping("/{userId}/comments/{commentId}")
+    public CommentFullDto updateComment(
+            @PathVariable(name = "userId") long userId,
+            @PathVariable(name = "commentId") long commentId,
+            @Valid @RequestBody final UpdateCommentDto data) {
+        return service.updateComment(userId, commentId, data);
+    }
+
+    @DeleteMapping("/{userId}/comments/{commentId}")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteComment(
+            @PathVariable(name = "userId") long userId,
+            @PathVariable(name = "commentId") long commentId) {
+        service.deleteComment(userId, commentId);
     }
 }

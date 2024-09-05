@@ -4,11 +4,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.dto.comment.Comment;
+import ru.practicum.dto.comment.CommentFullDto;
+import ru.practicum.dto.comment.mapper.CommentMapper;
+import ru.practicum.dto.enums.CommentStatus;
 import ru.practicum.dto.event.Event;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.event.mapper.EventMapper;
+import ru.practicum.explore.api.closed.service.CommentService;
 import ru.practicum.explore.exception.NotFoundException;
+import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.stat.StatDataService;
 import ru.practicum.explore.storage.EventRepository;
 import ru.practicum.explore.storage.RequestRepository;
@@ -16,6 +22,7 @@ import ru.practicum.explore.storage.RequestRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.dto.enums.CommentStatus.CREATE;
 import static ru.practicum.dto.enums.RequestStatus.CONFIRMED;
 import static ru.practicum.explore.utils.EventUtils.updateStatusByAdmin;
 
@@ -24,7 +31,9 @@ import static ru.practicum.explore.utils.EventUtils.updateStatusByAdmin;
 public class AdminEventService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
+
     private final StatDataService statDataService;
+    private final CommentService commentService;
 
     public Event findEventById(Long eventId) {
         return eventRepository
@@ -70,5 +79,15 @@ public class AdminEventService {
         fullEventDto.setConfirmedRequests(requestRepository.countByEventIdAndStatus(eventId, CONFIRMED));
 
         return fullEventDto;
+    }
+
+    public CommentFullDto updateCommentStatus(long commentId, CommentStatus newStatus) {
+        Comment comment = commentService.getCommentById(commentId);
+
+        if (comment.getStatus() != CREATE) {
+            throw new ValidationException("can update only in new status");
+        }
+        comment.setStatus(newStatus);
+        return CommentMapper.toFullDto(commentService.saveComment(comment));
     }
 }
