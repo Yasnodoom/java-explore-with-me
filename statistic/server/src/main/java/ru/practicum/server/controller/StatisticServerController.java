@@ -1,15 +1,14 @@
 package ru.practicum.server.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.dto.event.Event;
-import ru.practicum.dto.event.ViewStats;
+import ru.practicum.dto.logevent.LogEvent;
+import ru.practicum.dto.logevent.ViewStats;
 import ru.practicum.server.sevice.EventService;
 
-import java.sql.Timestamp;
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -19,20 +18,17 @@ public class StatisticServerController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public Event save(@RequestBody final Event event) {
+    public LogEvent save(@RequestBody final LogEvent event) {
         return eventService.save(event);
     }
 
-    @SneakyThrows
     @GetMapping("/stats")
-    public List<ViewStats> stats(@RequestParam String start,
-                                 @RequestParam String end,
-                                 @RequestParam(required = false) List<String> uris,
+    public List<ViewStats> stats(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                 LocalDateTime start,
+                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                 LocalDateTime end,
+                                 @RequestParam(required = false, defaultValue = "") List<String> uris,
                                  @RequestParam(required = false, defaultValue = "false") boolean unique) {
-        Timestamp s = Timestamp.valueOf(start);
-        Timestamp e = Timestamp.valueOf(end);
-        uris = uris == null ?  Collections.emptyList() : uris;
-
-        return eventService.findByParams(s, e, uris, unique);
+        return eventService.findByParams(start, end, uris, unique);
     }
 }

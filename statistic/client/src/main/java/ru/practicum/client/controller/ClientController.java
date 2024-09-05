@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.client.BaseClient;
-import ru.practicum.dto.event.Event;
+import ru.practicum.dto.logevent.LogEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,13 +17,13 @@ public class ClientController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> hit(@RequestBody final Event event) {
+    public ResponseEntity<Object> hit(@RequestBody final LogEvent event) {
         return client.hit(event);
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<Object> stats(@RequestParam String start,
-                                        @RequestParam String end,
+    public ResponseEntity<Object> stats(@RequestParam(required = false) String start,
+                                        @RequestParam(required = false) String end,
                                         @RequestParam(required = false) String uris,
                                         @RequestParam(required = false, defaultValue = "false") boolean unique) {
         Map<String, Object> parameters = new HashMap<>();

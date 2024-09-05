@@ -4,34 +4,33 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import ru.practicum.dto.event.Event;
-import ru.practicum.dto.event.ViewStats;
+import ru.practicum.dto.logevent.LogEvent;
+import ru.practicum.dto.logevent.ViewStats;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface ServerRepository extends JpaRepository<Event, Long> {
+public interface ServerRepository extends JpaRepository<LogEvent, Long> {
     @Query(value = """
             SELECT e.app, e.uri, COUNT(e.ip) AS hits
-            FROM events e
+            FROM log_events e
             WHERE e.timestamp BETWEEN cast(:start AS timestamp) AND cast(:end AS timestamp)
             AND (:uris is null or e.uri IN (:uris))
-            GROUP BY  e.uri, e.app
+            GROUP BY e.uri, e.app
             ORDER BY hits DESC""", nativeQuery = true)
-    List<ViewStats> findByParams(@Param("start") Timestamp start,
-                                 @Param("end") Timestamp end,
+    List<ViewStats> findByParams(@Param("start") LocalDateTime start,
+                                 @Param("end") LocalDateTime end,
                                  @Param("uris") List<String> uris);
 
     @Query(value = """
             SELECT e.app, e.uri, COUNT(distinct e.ip) AS hits
-            FROM events e
+            FROM log_events e
             WHERE e.timestamp BETWEEN cast(:start AS timestamp) AND cast(:end AS timestamp)
-            AND (:uris is null or e.uri IN (:uris))
-            GROUP BY  e.uri, e.app
+            AND coalesce(:uris, null) is null or e.uri IN (:uris)
+            GROUP BY e.uri, e.app
             ORDER BY hits DESC""", nativeQuery = true)
-    List<ViewStats> findByParamsUniqueIp(@Param("start") Timestamp start,
-                                         @Param("end") Timestamp end,
+    List<ViewStats> findByParamsUniqueIp(@Param("start") LocalDateTime start,
+                                         @Param("end") LocalDateTime end,
                                          @Param("uris") List<String> uris);
-
 }
