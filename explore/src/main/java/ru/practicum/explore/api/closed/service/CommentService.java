@@ -3,8 +3,12 @@ package ru.practicum.explore.api.closed.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.comment.Comment;
+import ru.practicum.dto.comment.CommentFullDto;
+import ru.practicum.dto.comment.mapper.CommentMapper;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.storage.CommentRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,5 +27,13 @@ public class CommentService {
 
     public Comment saveComment(Comment comment) {
         return commentRepository.save(comment);
+    }
+
+    public List<CommentFullDto> getAllCommentsByEventId(long eventId) {
+        return commentRepository
+                .findAllByEventId(eventId)
+                .stream()
+                .map(CommentMapper::toFullDto)
+                .toList();
     }
 }

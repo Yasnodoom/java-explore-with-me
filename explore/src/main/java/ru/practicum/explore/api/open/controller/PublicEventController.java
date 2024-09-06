@@ -4,7 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.complaint.ComplaintDto;
 import ru.practicum.dto.enums.SortType;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShotDto;
@@ -41,5 +43,10 @@ public class PublicEventController {
     @GetMapping("/{id}")
     public EventFullDto getById(HttpServletRequest request, @PathVariable Long id) {
         return publicEventService.getById(request, id);
+    }
+
+    @PostMapping("/complaint")
+    public ComplaintDto addComplaint(@Validated @RequestBody final ComplaintDto data) {
+        return publicEventService.addComplaint(data);
     }
 }

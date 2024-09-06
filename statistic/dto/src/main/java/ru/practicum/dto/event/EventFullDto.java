@@ -6,7 +6,7 @@ import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.dto.category.Category;
-import ru.practicum.dto.comment.CommentShotDto;
+import ru.practicum.dto.comment.CommentFullDto;
 import ru.practicum.dto.location.Location;
 import ru.practicum.dto.user.UserShortDto;
 
@@ -40,5 +40,5 @@ public class EventFullDto {
     private Status state;
     private String title;
     private Integer views;
-    private List<CommentShotDto> comments;
+    private List<CommentFullDto> comments;
 }

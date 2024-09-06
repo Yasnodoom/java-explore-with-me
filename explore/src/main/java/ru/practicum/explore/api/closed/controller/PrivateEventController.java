@@ -7,6 +7,7 @@ import ru.practicum.dto.comment.CommentFullDto;
 import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.dto.comment.UpdateCommentDto;
 import ru.practicum.dto.event.Event;
+import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
@@ -38,8 +39,8 @@ public class PrivateEventController {
     }
 
     @GetMapping("/{userId}/events/{eventId}")
-    public Event findEvent(@PathVariable long userId, @PathVariable long eventId) {
-        return service.findEvent(userId, eventId);
+    public EventFullDto findEvent(@PathVariable long userId, @PathVariable long eventId) {
+        return service.getEvent(userId, eventId);
     }
 
     @PatchMapping("/{userId}/events/{eventId}")

@@ -10,8 +10,10 @@ import ru.practicum.dto.comment.UpdateCommentDto;
 import ru.practicum.dto.comment.mapper.CommentMapper;
 import ru.practicum.dto.enums.RequestStatus;
 import ru.practicum.dto.event.Event;
+import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
+import ru.practicum.dto.event.mapper.EventMapper;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
@@ -23,6 +25,7 @@ import ru.practicum.explore.exception.ConflictException;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.storage.CommentRepository;
+import ru.practicum.explore.storage.ComplaintRepository;
 import ru.practicum.explore.storage.EventRepository;
 import ru.practicum.explore.storage.RequestRepository;
 
@@ -46,6 +49,7 @@ public class PrivateEventService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
     private final CommentRepository commentRepository;
+    private final ComplaintRepository complaintRepository;
 
     public Event create(long userId, NewEventDto data) {
         Event event = toEvent(data);
@@ -63,6 +67,19 @@ public class PrivateEventService {
         return eventRepository
                 .findByInitiatorUserIdAndId(userId, eventId)
                 .orElseThrow(() -> new NotFoundException(eventId));
+    }
+
+    public EventFullDto getEvent(long userId, long eventId) {
+        EventFullDto eventFullDto = eventRepository
+                .findByInitiatorUserIdAndId(userId, eventId)
+                .map(EventMapper::toEventFullDto)
+                .orElseThrow(() -> new NotFoundException(eventId));
+
+        List<CommentFullDto> comments = commentService.getAllCommentsByEventId(eventFullDto.getId());
+        comments.forEach(c -> c.setComplaints(complaintRepository.findAllByCommentId(c.getId())));
+        eventFullDto.setComments(comments);
+
+        return eventFullDto;
     }
 
     public Event updateEvent(long userId, long eventId, UpdateEventUserRequest data) {
@@ -140,10 +157,13 @@ public class PrivateEventService {
     public CommentFullDto getComment(long userId, long commentId) {
         checkUserPermission(userId, commentId);
 
-        return commentRepository
+        CommentFullDto commentFullDto = commentRepository
                 .findById(commentId)
                 .map(CommentMapper::toFullDto)
                 .orElseThrow(() -> new NotFoundException(commentId));
+        commentFullDto.setComplaints(complaintRepository.findAllByCommentId(commentId));
+
+        return commentFullDto;
     }
 
     public CommentFullDto updateComment(long userId, long commentId, UpdateCommentDto data) {
@@ -171,6 +191,7 @@ public class PrivateEventService {
         }
 
         comment.setAuthor(adminUserService.getUserById(userId));
+        comment.setEvent(event);
 
         return CommentMapper.toFullDto(commentRepository.save(comment));
     }

@@ -5,8 +5,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.dto.comment.CommentFullDto;
-import ru.practicum.dto.enums.CommentStatus;
+import ru.practicum.dto.complaint.Complaint;
+import ru.practicum.dto.enums.ComplaintStatus;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.explore.api.admin.service.AdminEventService;
@@ -51,12 +51,10 @@ public class AdminEventController {
         commentService.deleteCommentById(commentId);
     }
 
-    @PatchMapping("/comments/{commentId}")
-    public CommentFullDto updateCommentStatus(
-            @PathVariable(name = "commentId") long commentId,
-            @RequestParam CommentStatus newStatus) {
-        return service.updateCommentStatus(commentId, newStatus);
+    @PatchMapping("/complaints/{complaintId}")
+    public Complaint considerComplaint(
+            @PathVariable(name = "complaintId") long complaintId,
+            @RequestParam ComplaintStatus status) {
+        return service.considerComplaint(complaintId, status);
     }
 }
-// любой пользователь подает жалобу на комент
-// админ может либо удалить комент либо удалить жалобу

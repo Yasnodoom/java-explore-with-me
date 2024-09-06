@@ -17,13 +17,13 @@ public class CommentMapper {
                 .author(UserMapper.toUserShortDto(comment.getAuthor()))
                 .event(EventMapper.toEventShotDto(comment.getEvent()))
                 .created(comment.getCreate())
-                .status(comment.getStatus())
-                .publish(comment.getPublish())
                 .build();
     }
+
     public static Comment toComment(NewCommentDto dto) {
         return Comment.builder()
                 .text(dto.getText())
+                .create(dto.getCreated())
                 .build();
     }
 }

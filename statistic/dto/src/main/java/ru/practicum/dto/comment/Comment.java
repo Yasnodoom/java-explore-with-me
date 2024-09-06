@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.dto.complaint.Complaint;
-import ru.practicum.dto.enums.CommentStatus;
 import ru.practicum.dto.event.Event;
 import ru.practicum.dto.user.User;
 
@@ -22,10 +20,10 @@ public class Comment {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @Column(name = "comment_id")
+    @Column(name = "id")
     private Long id;
 
-    @Column(name = "comment_text")
+    @Column(name = "text")
     private String text;
 
     @ManyToOne(optional = false)
