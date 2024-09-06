@@ -6,10 +6,12 @@ import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.dto.category.Category;
+import ru.practicum.dto.comment.CommentFullDto;
 import ru.practicum.dto.location.Location;
 import ru.practicum.dto.user.UserShortDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -38,4 +40,5 @@ public class EventFullDto {
     private Status state;
     private String title;
     private Integer views;
+    private List<CommentFullDto> comments;
 }

@@ -6,16 +6,24 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.dto.comment.Comment;
+import ru.practicum.dto.complaint.Complaint;
+import ru.practicum.dto.complaint.ComplaintDto;
+import ru.practicum.dto.complaint.mapper.ComplaintMapper;
 import ru.practicum.dto.enums.SortType;
 import ru.practicum.dto.event.Event;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShotDto;
 import ru.practicum.dto.event.mapper.EventMapper;
+import ru.practicum.dto.user.User;
+import ru.practicum.explore.api.admin.service.AdminUserService;
+import ru.practicum.explore.api.closed.service.CommentService;
 import ru.practicum.explore.api.closed.service.PrivateEventService;
 import ru.practicum.explore.api.closed.service.PrivateRequestService;
 import ru.practicum.explore.exception.NotFoundException;
 import ru.practicum.explore.exception.ValidationException;
 import ru.practicum.explore.stat.StatDataService;
+import ru.practicum.explore.storage.ComplaintRepository;
 import ru.practicum.explore.storage.EventRepository;
 
 import java.time.LocalDateTime;
@@ -30,9 +38,13 @@ import static ru.practicum.dto.event.mapper.EventMapper.toEventFullDto;
 @RequiredArgsConstructor
 public class PublicEventService {
     private final EventRepository eventRepository;
+    private final ComplaintRepository complaintRepository;
+
     private final PrivateRequestService privateRequestService;
     private final PrivateEventService privateEventService;
     private final StatDataService statDataService;
+    private final CommentService commentService;
+    private final AdminUserService adminUserService;
 
     @Transactional
     public List<EventShotDto> find(HttpServletRequest request, String text, List<Long> categories, Boolean paid,
@@ -89,9 +101,24 @@ public class PublicEventService {
         EventFullDto eventFullDto = toEventFullDto(event);
         eventFullDto.setConfirmedRequests(confirmRequests);
         eventFullDto.setViews(statDataService.getRequestHits(request.getRequestURI()));
+        eventFullDto.setComments(commentService.getAllCommentsByEventId(id));
 
         statDataService.logRequest(request);
 
         return eventFullDto;
+    }
+
+    public ComplaintDto addComplaint(ComplaintDto data) {
+        Complaint complaint = ComplaintMapper.toComplaint(data);
+        Comment comment = commentService.getCommentById(data.getCommentId());
+        User author = adminUserService.getUserById(data.getComplainerId());
+
+        if (comment.getAuthor().equals(author)) {
+            throw new ValidationException("you have already  added complaint");
+        }
+        complaint.setComment(comment);
+        complaint.setComplainer(author);
+
+        return ComplaintMapper.toComplaintDto(complaintRepository.save(complaint));
     }
 }
